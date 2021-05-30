@@ -34,7 +34,7 @@ public class Movie {
 
     @Override
     public String toString() {
-        String genres = this.getGenres().stream().map(Genre::getName).collect(Collectors.joining(", "));
+        String genres = this.genres != null ? this.getGenres().stream().map(Genre::getName).collect(Collectors.joining(", ")) : "NOT DEFINED";
         return "ID: %s | NAME: %-30s | DURATION: %s | RELEASE DATE: %s | GENRES: %s".formatted(
                 colorString(Color.BLUE, this.id),
                 colorString(Color.GREEN, this.name),

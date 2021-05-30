@@ -2,6 +2,7 @@ import az.code.db.DataBase;
 import az.code.db.PostgreDB;
 import az.code.model.*;
 import az.code.util.Color;
+import az.code.util.Printer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -21,6 +22,7 @@ public class Main {
     private static final DataBase db = new PostgreDB(PostgreDB.UnitName.IMDB);
     private static final EntityManager manager = db.getManager();
     private static final Pattern namePattern = Pattern.compile("\\p{Alpha}+");
+    private static final String updateStatement = "Do you want to continue editing?";
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     public static void main(String[] args) {
@@ -47,7 +49,7 @@ public class Main {
         }
     }
 
-    //Starts crud options. Prints crud menu asks user selection.//TODO: Change description
+    //Starts CRUD operations on Movie entities.
     //IF any selection throw Exception (BackToMenu) this try-catch block catches it and returns main menu.
     public static void operationMovie() {
         try {
@@ -63,6 +65,15 @@ public class Main {
                     println("Movie " + colorString(Color.PURPLE, movie.getName()) + " added to DB!");
                     break;
                 case 2:
+                    int limit = getInteger("number of entities you want to see");
+                    boolean input = !askFinished("Do you want to order entities?");
+                    if (input) {
+                        printMovies(limit, true);
+                    } else {
+                        printMovies(limit);
+                    }
+                    break;
+                case 3:
                     StringBuilder search = new StringBuilder(getName("name of movie you want to search"));
                     TypedQuery<Movie> query = manager.createQuery(
                             "SELECT movie FROM Movie movie WHERE lower(movie.name) LIKE lower(:search)", Movie.class);
@@ -111,12 +122,11 @@ public class Main {
                         printError("There is no movie name which starts with \"" + search.substring(0, search.length() - 1) + "\"");
                     }
             }
-        } catch (BackToMenu ignored) {
-        }
+        } catch (BackToMenu ignored) {}
         println(returningMainMenu);
     }
 
-    //Starts crud options. Prints crud menu asks user selection.//TODO: Change description
+    //Starts CRUD operations on Genre entities.
     //IF any selection throw Exception (BackToMenu) this try-catch block catches it and returns main menu.
     public static void operationGenre() {
         try {
@@ -132,6 +142,8 @@ public class Main {
                     println("Genre " + colorString(Color.PURPLE, genre.getName()) + " added to DB!");
                     break;
                 case 2:
+                    break;
+                case 3:
                     StringBuilder search = new StringBuilder(getName("name of genre you want to search"));
                     TypedQuery<Genre> query = manager.createQuery(
                             "SELECT genre FROM Genre genre WHERE lower(genre.name) LIKE lower(:search)", Genre.class);
@@ -185,7 +197,7 @@ public class Main {
         println(returningMainMenu);
     }
 
-    //Starts crud options. Prints crud menu asks user selection.//TODO: Change description
+    //Starts CRUD operations on Profession entities.
     //IF any selection throw Exception (BackToMenu) this try-catch block catches it and returns main menu.
     public static void operationProfession() {
         try {
@@ -201,6 +213,8 @@ public class Main {
                     println("Profession " + colorString(Color.PURPLE, profession.getName()) + " added to DB!");
                     break;
                 case 2:
+                    break;
+                case 3:
                     StringBuilder search = new StringBuilder(getName("name of profession you want to search"));
                     TypedQuery<Profession> query = manager.createQuery(
                             "SELECT profession FROM Profession profession WHERE lower(profession.name) LIKE lower(:search)", Profession.class);
@@ -254,7 +268,7 @@ public class Main {
         println(returningMainMenu);
     }
 
-    //Starts crud options. Prints crud menu asks user selection.//TODO: Change description
+    //Starts CRUD operations on Person entities.
     //IF any selection throw Exception (BackToMenu) this try-catch block catches it and returns main menu.
     public static void operationPerson() {
         try {
@@ -270,6 +284,8 @@ public class Main {
                     println("Person " + colorString(Color.PURPLE, person.getName()) + " added to DB!");
                     break;
                 case 2:
+                    break;
+                case 3:
                     StringBuilder search = new StringBuilder(getName("name of person you want to search"));
                     TypedQuery<Person> query = manager.createQuery(
                             "SELECT person FROM Person person WHERE lower(person.name) LIKE lower(:search)", Person.class);
@@ -328,6 +344,41 @@ public class Main {
      * Continues until user inserts "-1" or valid selection.
      *
      * @param limit limits selection from 0 (inclusive) to limit (inclusive).
+     **/
+    private static void printMovies(int limit, boolean order) {
+        String sql = "SELECT movie FROM Movie movie";
+        if (order) {
+            printMenu(orderMovie);
+            sql += " ORDER BY movie.";
+            switch (getSelection(4)) {
+                case -1, 0 -> throw new BackToMenu();
+                case 1 -> sql += "name";
+                case 2 -> sql += "duration";
+                case 3 -> sql += "releaseDate";
+                case 4 -> sql += "id";
+            }
+            printMenu(Printer.order);
+            switch (getSelection(2)) {
+                case -1, 0 -> throw new BackToMenu();
+                case 1 -> sql += " ASC";
+                case 2 -> sql += " DESC";
+            }
+        }
+        TypedQuery<Movie> query = manager.createQuery(sql, Movie.class);
+        query.setMaxResults(limit);
+        List<Movie> movies = query.getResultList();
+        movies.forEach(System.out::println);
+    }
+
+    private static void printMovies(int limit) {
+        printMovies(limit, false);
+    }
+
+    /**
+     * Gets selections for switches.
+     * Continues until user inserts "-1" or valid selection.
+     *
+     * @param limit limits selection from 0 (inclusive) to limit (inclusive).
      * @return integer selection which will be used in switches.
      **/
     private static int getSelection(int limit) {
@@ -350,11 +401,11 @@ public class Main {
     }
 
     /**
-     * Gets name, last name or father name for updating or creating new user.//TODO: Change description
+     * Gets name of entities fields for updating or creating new entity.
      * Continues until user inserts "-1" or valid name.
      *
-     * @param specification type of field that you want user to insert.
-     * @return string valid name, last name or father name.
+     * @param specification name of field that you want user to insert.
+     * @return string, valid name.
      * @throws BackToMenu if user inserts "-1" as input.
      **/
     private static String getName(String specification) {
@@ -370,11 +421,11 @@ public class Main {
     }
 
     /**
-     * Gets name, last name or father name for updating or creating new user.//TODO: Change description
-     * Continues until user inserts "-1" or valid name.
+     * Gets integer value of fields for updating or creating new entity.
+     * Continues until user inserts "-1" or valid integer.
      *
-     * @param specification type of field that you want user to insert.
-     * @return string valid name, last name or father name.
+     * @param specification name of field that you want user to insert.
+     * @return string, valid integer.
      * @throws BackToMenu if user inserts "-1" as input.
      **/
     private static Integer getInteger(String specification) {
@@ -396,11 +447,11 @@ public class Main {
     }
 
     /**
-     * Gets name, last name or father name for updating or creating new user.//TODO: Change description
+     * Gets new date for updating or creating entity.
      * Continues until user inserts "-1" or valid name.
      *
-     * @param specification type of field that you want user to insert.
-     * @return string valid name, last name or father name.
+     * @param specification name of field that you want user to insert.
+     * @return LocalDate, valid date.
      * @throws BackToMenu if user inserts "-1" as input.
      **/
     private static LocalDate getDate(String specification) {
@@ -418,10 +469,10 @@ public class Main {
     }
 
     /**
-     * Gets name, last name or father name for updating or creating new user.//TODO: Change description
+     * Gets all genres and gives option to user for selecting multiple genres.
      * Continues until user inserts "-1" or valid name.
      *
-     * @return string valid name, last name or father name.
+     * @return List of genres that user selected.
      * @throws BackToMenu if user inserts "-1" as input.
      **/
     private static List<Genre> getGenres() {
@@ -435,18 +486,26 @@ public class Main {
             count++;
         }
         print("Enter genre numbers by comma without any whitespace characters: ");
-        String input = scanner.nextLine();//TODO: Check user input
-        for (String number : input.split(",")) {
-            selectedGenres.add(allGenres.get(Integer.parseInt(number) - 1));
+        String input = scanner.nextLine();
+        Pattern pattern = Pattern.compile("^\\p{Digit}+(,\\p{Digit}+)*$");
+        if (pattern.matcher(input).matches()) {
+            for (String number : input.split(",")) {
+                try {
+                    selectedGenres.add(allGenres.get(Integer.parseInt(number) - 1));
+                } catch (IndexOutOfBoundsException ignored) {
+                    printError("This genre does not exists.");
+                    throw new BackToMenu();
+                }
+            }
         }
         return selectedGenres;
     }
 
     /**
-     * Gets name, last name or father name for updating or creating new user.//TODO: Change description
+     * Gets profession for updating or creating new person.
      * Continues until user inserts "-1" or valid name.
      *
-     * @return string valid name, last name or father name.
+     * @return Profession, profession of Person selected by user.
      * @throws BackToMenu if user inserts "-1" as input.
      **/
     private static Profession getProfession() {
@@ -462,6 +521,7 @@ public class Main {
         return allProfessions.get(selection - 1);
     }
 
+    //Asks new PersonDetail data for creating new PersonDetail object.
     private static PersonDetail getDetails() {
         String address = getName("address of person");
         String phoneNumber = getName("phone number of person");
@@ -518,13 +578,13 @@ public class Main {
     }
 
     /**
-     * Updates Student in Map.//TODO: Change description
+     * Updates Movie object.
      * Continues until user selects exit (0) option.
      * Or user selects -1 for returning main menu.
-     * Or until user inserts "no" after updating 1 field of Student object.
+     * Or until user inserts "no" after updating 1 field of Movie object.
      *
-     * @param movie given string by user.
-     * @return boolean true if any field of Student object has been updated, false if update process fails.
+     * @param movie selected object wanted to be updated.
+     * @return boolean true if any field of Movie object has been updated, false if update process fails.
      **/
     private static boolean updateMovie(Movie movie) {
         boolean finished = true;
@@ -537,22 +597,22 @@ public class Main {
                     return updated;
                 case 1:
                     movie.setName(getName("name"));
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 2:
                     movie.setDuration(getInteger("duration"));
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 3:
                     movie.setReleaseDate(getDate("release date"));
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 4:
                     movie.setGenres(getGenres());
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
             }
@@ -561,13 +621,13 @@ public class Main {
     }
 
     /**
-     * Updates Student in Map.//TODO: Change description
+     * Updates Genre object.
      * Continues until user selects exit (0) option.
      * Or user selects -1 for returning main menu.
-     * Or until user inserts "no" after updating 1 field of Student object.
+     * Or until user inserts "no" after updating 1 field of Genre object.
      *
-     * @param genre given string by user.
-     * @return boolean true if any field of Student object has been updated, false if update process fails.
+     * @param genre selected object wanted to be updated.
+     * @return boolean true if any field of Genre object has been updated, false if update process fails.
      **/
     private static boolean updateGenre(Genre genre) {
         genre.setName(getName("name"));
@@ -575,13 +635,13 @@ public class Main {
     }
 
     /**
-     * Updates Student in Map.//TODO: Change description
+     * Updates Profession object.
      * Continues until user selects exit (0) option.
      * Or user selects -1 for returning main menu.
-     * Or until user inserts "no" after updating 1 field of Student object.
+     * Or until user inserts "no" after updating 1 field of Profession object.
      *
-     * @param profession given string by user.
-     * @return boolean true if any field of Student object has been updated, false if update process fails.
+     * @param profession selected object wanted to be updated.
+     * @return boolean true if any field of Profession object has been updated, false if update process fails.
      **/
     private static boolean updateProfession(Profession profession) {
         profession.setName(getName("name"));
@@ -589,13 +649,13 @@ public class Main {
     }
 
     /**
-     * Updates Student in Map.//TODO: Change description
+     * Updates Person object.
      * Continues until user selects exit (0) option.
      * Or user selects -1 for returning main menu.
-     * Or until user inserts "no" after updating 1 field of Student object.
+     * Or until user inserts "no" after updating 1 field of Person object.
      *
-     * @param person given string by user.
-     * @return boolean true if any field of Student object has been updated, false if update process fails.
+     * @param person selected object wanted to be updated.
+     * @return boolean true if any field of Person object has been updated, false if update process fails.
      **/
     private static boolean updatePerson(Person person) {
         boolean finished = true;
@@ -608,42 +668,42 @@ public class Main {
                     return updated;
                 case 1:
                     person.setName(getName("name"));
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 2:
                     person.setSurname(getName("surname"));
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 3:
                     person.setPatronymic(getName("patronymic"));
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 4:
                     person.setBirthDate(getDate("birthdate"));
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 5:
                     person.setProfession(getProfession());
-                    finished = askFinished();
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 6:
-                    person.getDetail().setAddress(getName("address"));//TODO: Create new method
-                    finished = askFinished();
+                    person.getDetail().setAddress(getName("address"));//TODO: Create new method for input check
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 7:
-                    person.getDetail().setPhoneNumber(getName("phone number"));//TODO: Create new method
-                    finished = askFinished();
+                    person.getDetail().setPhoneNumber(getName("phone number"));//TODO: Create new method for input check
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
                 case 8:
-                    person.getDetail().setEmail(getName("email"));//TODO: Create new method
-                    finished = askFinished();
+                    person.getDetail().setEmail(getName("email"));//TODO: Create new method for input check
+                    finished = askFinished(updateStatement);
                     updated = true;
                     break;
             }
@@ -656,13 +716,14 @@ public class Main {
      * This indicates that if user wants to continue editing or wants to stop and return main menu.
      * Continues until user inserts "-1" or valid input.
      *
+     * @param specification finishing statement.
      * @return boolean true if any user inserts valid "yes", false if inserts valid "no".
      * @throws BackToMenu if user inserts "-1" as input.
      **/
-    private static boolean askFinished() {
+    private static boolean askFinished(String specification) {
         Pattern pattern = Pattern.compile("(?i)([yn]|(?i)(yes|no))");
         do {
-            print("Do you want to continue editing? Yes/No: ");
+            print(specification + " Yes/No: ");
             String ans = scanner.next();
             if (pattern.matcher(ans).matches()) {
                 return !ans.equalsIgnoreCase("yes");
@@ -680,9 +741,3 @@ public class Main {
         }
     }
 }
-
-//        manager.getTransaction().begin();
-//        TypedQuery<Movie> query = manager.createQuery("SELECT movie FROM Movie movie", Movie.class);
-//        query.getResultList().forEach(movie -> System.out.println(movie.getName()));
-//        manager.merge(Movie.builder().name("Test").duration(123).releaseDate(LocalDate.now()).build());
-//        manager.getTransaction().commit();

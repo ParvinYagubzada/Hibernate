@@ -18,7 +18,8 @@ public final class Printer {
             """ + Color.RESET.asString;
     public static final String createOrSearch = Color.BLUE.asString + """
             \t1. Create new Entity.
-            \t2. Search for Update or Delete.""" + Color.YELLOW.asString + """
+            \t2. Select entities from db.
+            \t3. Search for Update or Delete.""" + Color.YELLOW.asString + """
                         
             \t0. Back.
             """ + Color.RESET.asString;
@@ -28,12 +29,28 @@ public final class Printer {
                         
             \t0. Back.
             """ + Color.RESET.asString;
+    public static final String order =Color.BLUE.asString + """
+            \t\t ORDER TYPE:
+            \t1. Ascending.
+            \t2. Descending""" + Color.YELLOW.asString + """
+                        
+            \t0. Back.
+            """ + Color.RESET.asString;
     public static final String updateMovie =Color.BLUE.asString + """
             \t\t UPDATE MOVIE BY:
             \t1. Name.
             \t2. Duration
             \t3. Release date.
             \t4. Genres.""" + Color.YELLOW.asString + """
+                        
+            \t0. Back.
+            """ + Color.RESET.asString;
+    public static final String orderMovie =Color.BLUE.asString + """
+            \t\t ORDER MOVIE BY:
+            \t1. Name.
+            \t2. Duration
+            \t3. Release date.
+            \t4. Id""" + Color.YELLOW.asString + """
                         
             \t0. Back.
             """ + Color.RESET.asString;
