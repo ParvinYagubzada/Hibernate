@@ -467,29 +467,29 @@ public class Main {
                 "FROM Person person " +
                 "JOIN person.detail personDetail " +
                 "JOIN person.profession profession";
-
+        StringBuilder builder = new StringBuilder(sql);
         if (order) {
             printMenu(orderPerson);
-            sql += " ORDER BY ";
+            builder.append(" ORDER BY ");
             switch (getSelection(8)) {
                 case -1, 0 -> throw new BackToMenu();
-                case 1 -> sql += "person.name";
-                case 2 -> sql += "person.surname";
-                case 3 -> sql += "person.patronymic";
-                case 4 -> sql += "person.birthdate";
-                case 5 -> sql += "profession.name";
-                case 6 -> sql += "personDetail.address";
-                case 7 -> sql += "personDetail.phoneNumber";
-                case 8 -> sql += "personDetail.email";
+                case 1 -> builder.append("person.name");
+                case 2 -> builder.append("person.surname");
+                case 3 -> builder.append("person.patronymic");
+                case 4 -> builder.append("person.birthdate");
+                case 5 -> builder.append("profession.name");
+                case 6 -> builder.append("personDetail.address");
+                case 7 -> builder.append("personDetail.phoneNumber");
+                case 8 -> builder.append("personDetail.email");
             }
             printMenu(Printer.order);
             switch (getSelection(2)) {
                 case -1, 0 -> throw new BackToMenu();
-                case 1 -> sql += " ASC";
-                case 2 -> sql += " DESC";
+                case 1 -> builder.append(" ASC");
+                case 2 -> builder.append(" DESC");
             }
         }
-        TypedQuery<Person> query = manager.createQuery(sql, Person.class);
+        TypedQuery<Person> query = manager.createQuery(builder.toString(), Person.class);
         query.setMaxResults(limit);
         List<Person> persons = query.getResultList();
         persons.forEach(System.out::println);
