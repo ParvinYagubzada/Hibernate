@@ -40,7 +40,10 @@ public class Person {
                 colorString(Color.GREEN, this.patronymic),
                 colorString(Color.GREEN, this.birthDate),
                 colorString(Color.GREEN, this.profession.getName()),
-                colorString(Color.GREEN, this.detail.getAddress())
-        );
+                colorString(Color.GREEN, String.join("|",
+                        this.detail.getAddress(),
+                        this.detail.getEmail(),
+                        this.detail.getPhoneNumber())
+                ));
     }
 }

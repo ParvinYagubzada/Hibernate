@@ -142,6 +142,13 @@ public class Main {
                     println("Genre " + colorString(Color.PURPLE, genre.getName()) + " added to DB!");
                     break;
                 case 2:
+                    int limit = getInteger("number of entities you want to see");
+                    boolean input = !askFinished("Do you want to order entities?");
+                    if (input) {
+                        printGenres(limit, true);
+                    } else {
+                        printGenres(limit);
+                    }
                     break;
                 case 3:
                     StringBuilder search = new StringBuilder(getName("name of genre you want to search"));
@@ -213,6 +220,13 @@ public class Main {
                     println("Profession " + colorString(Color.PURPLE, profession.getName()) + " added to DB!");
                     break;
                 case 2:
+                    int limit = getInteger("number of entities you want to see");
+                    boolean input = !askFinished("Do you want to order entities?");
+                    if (input) {
+                        printProfessions(limit, true);
+                    } else {
+                        printProfessions(limit);
+                    }
                     break;
                 case 3:
                     StringBuilder search = new StringBuilder(getName("name of profession you want to search"));
@@ -284,6 +298,13 @@ public class Main {
                     println("Person " + colorString(Color.PURPLE, person.getName()) + " added to DB!");
                     break;
                 case 2:
+                    int limit = getInteger("number of entities you want to see");
+                    boolean input = !askFinished("Do you want to order entities?");
+                    if (input) {
+                        printPersons(limit, true);
+                    } else {
+                        printPersons(limit);
+                    }
                     break;
                 case 3:
                     StringBuilder search = new StringBuilder(getName("name of person you want to search"));
@@ -340,7 +361,7 @@ public class Main {
     }
 
     /**
-     * Gets selections for switches.
+     * Prints ordered Movie entities.
      * Continues until user inserts "-1" or valid selection.
      *
      * @param limit limits selection from 0 (inclusive) to limit (inclusive).
@@ -372,6 +393,110 @@ public class Main {
 
     private static void printMovies(int limit) {
         printMovies(limit, false);
+    }
+
+    /**
+     * Prints ordered Genre entities.
+     * Continues until user inserts "-1" or valid selection.
+     *
+     * @param limit limits selection from 0 (inclusive) to limit (inclusive).
+     **/
+    private static void printGenres(int limit, boolean order) {
+        String sql = "SELECT genre FROM Genre genre";
+        if (order) {
+            printMenu(orderGenre);
+            sql += " ORDER BY genre.";
+            sql += addOrderString(sql);
+        }
+        TypedQuery<Genre> query = manager.createQuery(sql, Genre.class);
+        query.setMaxResults(limit);
+        List<Genre> genres = query.getResultList();
+        genres.forEach(System.out::println);
+    }
+
+    private static void printGenres(int limit) {
+        printGenres(limit, false);
+    }
+
+    /**
+     * Prints ordered Profession entities.
+     * Continues until user inserts "-1" or valid selection.
+     *
+     * @param limit limits selection from 0 (inclusive) to limit (inclusive).
+     **/
+    private static void printProfessions(int limit, boolean order) {
+        String sql = "SELECT profession FROM Profession profession";
+        if (order) {
+            printMenu(orderProfession);
+            sql += " ORDER BY profession.";
+            sql += addOrderString(sql);
+        }
+        TypedQuery<Profession> query = manager.createQuery(sql, Profession.class);
+        query.setMaxResults(limit);
+        List<Profession> professions = query.getResultList();
+        professions.forEach(System.out::println);
+    }
+
+    private static void printProfessions(int limit) {
+        printProfessions(limit, false);
+    }
+
+    private static String addOrderString(String sql) {
+        switch (getSelection(2)) {
+            case -1, 0 -> throw new BackToMenu();
+            case 1 -> sql += "name";
+            case 2 -> sql += "id";
+        }
+        printMenu(Printer.order);
+        switch (getSelection(2)) {
+            case -1, 0 -> throw new BackToMenu();
+            case 1 -> sql += " ASC";
+            case 2 -> sql += " DESC";
+        }
+        return sql;
+    }
+
+    /**
+     * Prints ordered Person entities.
+     * Continues until user inserts "-1" or valid selection.
+     *
+     * @param limit limits selection from 0 (inclusive) to limit (inclusive).
+     **/
+    private static void printPersons(int limit, boolean order) {
+        String sql = "SELECT person " +
+                "FROM Person person " +
+                "JOIN person.detail personDetail " +
+                "JOIN person.profession profession";
+
+        if (order) {
+            printMenu(orderPerson);
+            sql += " ORDER BY ";
+            switch (getSelection(8)) {
+                case -1, 0 -> throw new BackToMenu();
+                case 1 -> sql += "person.name";
+                case 2 -> sql += "person.surname";
+                case 3 -> sql += "person.patronymic";
+                case 4 -> sql += "person.birthdate";
+                case 5 -> sql += "profession.name";
+                case 6 -> sql += "personDetail.address";
+                case 7 -> sql += "personDetail.phoneNumber";
+                case 8 -> sql += "personDetail.email";
+            }
+            printMenu(Printer.order);
+            switch (getSelection(2)) {
+                case -1, 0 -> throw new BackToMenu();
+                case 1 -> sql += " ASC";
+                case 2 -> sql += " DESC";
+            }
+        }
+        TypedQuery<Person> query = manager.createQuery(sql, Person.class);
+        query.setMaxResults(limit);
+        List<Person> persons = query.getResultList();
+        persons.forEach(System.out::println);
+    }
+
+    private static void printPersons(int limit) {
+        printPersons(limit, false);
     }
 
     /**

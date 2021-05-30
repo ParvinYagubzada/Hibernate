@@ -54,6 +54,20 @@ public final class Printer {
                         
             \t0. Back.
             """ + Color.RESET.asString;
+    public static final String orderGenre =Color.BLUE.asString + """
+            \t\t ORDER GENRE BY:
+            \t1. Name.
+            \t2. Id""" + Color.YELLOW.asString + """
+                        
+            \t0. Back.
+            """ + Color.RESET.asString;
+    public static final String orderProfession =Color.BLUE.asString + """
+            \t\t ORDER PROFESSION BY:
+            \t1. Name.
+            \t2. Id""" + Color.YELLOW.asString + """
+                        
+            \t0. Back.
+            """ + Color.RESET.asString;
     public static final String updatePerson = Color.BLUE.asString + """
             \t\t UPDATE PERSON BY:
             \t1. Name.
@@ -64,6 +78,19 @@ public final class Printer {
             \t6. Address.
             \t7. Phone Number.
             \t7. Email.""" + Color.YELLOW.asString + """
+                        
+            \t0. Back.
+            """ + Color.RESET.asString;
+    public static final String orderPerson =Color.BLUE.asString + """
+            \t\t ORDER PERSON BY:
+            \t1. Name.
+            \t2. Surname
+            \t3. Patronymic.
+            \t4. Birth date.
+            \t5. Profession.
+            \t6. Address.
+            \t7. Phone number.
+            \t8. Email.""" + Color.YELLOW.asString + """
                         
             \t0. Back.
             """ + Color.RESET.asString;
