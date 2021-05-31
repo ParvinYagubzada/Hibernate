@@ -32,15 +32,23 @@ public class Movie {
     )
     private List<Genre> genres;
 
+    @ManyToMany
+    @JoinTable(name = "relation_movie_person",
+            joinColumns = @JoinColumn(name = "movie_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"))
+    private List<Person> persons;
+
     @Override
     public String toString() {
         String genres = this.genres != null ? this.getGenres().stream().map(Genre::getName).collect(Collectors.joining(", ")) : "NOT DEFINED";
-        return "ID: %s | NAME: %-30s | DURATION: %s | RELEASE DATE: %s | GENRES: %s".formatted(
+        String persons = this.persons != null ? this.getPersons().stream().map(Person::getName).collect(Collectors.joining(", ")) : "NOT DEFINED";
+        return "ID: %s | NAME: %-30s | DURATION: %s | RELEASE DATE: %s | GENRES: %-25s | PERSONS: %s".formatted(
                 colorString(Color.BLUE, this.id),
                 colorString(Color.GREEN, this.name),
                 colorString(Color.GREEN, this.duration),
                 colorString(Color.GREEN, this.releaseDate),
-                colorString(Color.PURPLE, genres)
+                colorString(Color.PURPLE, genres),
+                colorString(Color.PURPLE, persons)
         );
     }
 }
